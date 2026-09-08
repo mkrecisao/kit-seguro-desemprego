@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora Seguro-Desemprego — Kit Seguro-Desemprego</title>
+  <meta name="description" content="Estime elegibilidade, valor da parcela e total do seguro-desemprego. Conteúdo informativo." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260908seguro" />
+  <link rel="icon" href="logo.png" type="image/png" />
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <header class="top">
+    <a class="brand" href="./" style="text-decoration:none;color:inherit">
+      <img class="logo-mark" src="logo.png" width="36" height="36" alt="Kit Seguro-Desemprego" />
+      <span class="logo-text">Kit Seguro-Desemprego</span>
+    </a>
+    <nav class="kits-nav" aria-label="Navegar entre kits">
+      <a class="kits-link" href="https://mkrecisao.github.io/rescisao-clara/">Rescisão</a>
+      <a class="kits-link" href="https://mkrecisao.github.io/kit-fgts/">FGTS</a>
+      <a class="kits-link is-on" href="./" aria-current="page">Seguro</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Inclusa no kit · estimativa educativa</p>
+      <h1>Calculadora <span>Seguro-Desemprego</span></h1>
+      <p class="lead">Elegibilidade por tipo de saída, valor estimado da parcela (piso/teto 2026 informativos) e total. Nada é enviado — tudo roda no seu aparelho.</p>
+      <ul class="trust-row">
+        <li>Sem cadastro</li>
+        <li>Sem guardar dados</li>
+        <li>Confirme no gov.br</li>
+      </ul>
+    </section>
+
+    <section class="block">
+      <div class="card calc-panel is-on">
+        <h2>Estimativa do benefício</h2>
+        <p class="calc-hint">Use a média dos últimos 3 salários e o tempo de vínculo no período de referência. Valores de piso (~R$1.621) e teto (~R$2.518,65) são estimativas informativas de 2026 — confirme no gov.br.</p>
+
+        <label class="field">
+          <span>Tipo de saída</span>
+          <select id="tipoSaida">
+            <option value="sjc">Demissão sem justa causa</option>
+            <option value="indireta">Rescisão indireta</option>
+            <option value="pedido">Pedido de demissão</option>
+            <option value="acordo">Acordo (art. 484-A)</option>
+            <option value="justa">Justa causa</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Média salarial (últimos 3 salários) — R$</span>
+          <input id="media" type="text" inputmode="decimal" placeholder="Ex: 2800" autocomplete="off" />
+        </label>
+
+        <label class="field">
+          <span>Meses trabalhados no período de referência</span>
+          <input id="meses" type="number" min="0" max="120" step="1" placeholder="Ex: 18" autocomplete="off" />
+        </label>
+
+        <label class="field">
+          <span>Ou escolha o nº de parcelas (opcional)</span>
+          <select id="parcelasFixas">
+            <option value="">Calcular pelos meses</option>
+            <option value="3">3 parcelas</option>
+            <option value="4">4 parcelas</option>
+            <option value="5">5 parcelas</option>
+          </select>
+        </label>
+
+        <button type="button" class="btn btn-primary btn-block" id="calcBtn">Calcular estimativa</button>
+
+        <div class="result" id="result" hidden>
+          <div class="result-main"><span id="elegLabel">Elegibilidade</span><strong id="elegValor">—</strong></div>
+          <ul class="result-meta" id="meta"></ul>
+        </div>
+
+        <details class="calc-table">
+          <summary>Tabela de parcelas (regra de bolso)</summary>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Meses de vínculo*</th><th>Parcelas</th></tr></thead>
+              <tbody>
+                <tr><td>Menos de 6</td><td>Em geral sem direito (confirme regras do pedido)</td></tr>
+                <tr><td>6 a 11 meses</td><td>3 parcelas (cenário comum)</td></tr>
+                <tr><td>12 a 23 meses</td><td>4 parcelas (cenário comum)</td></tr>
+                <tr><td>24 meses ou mais</td><td>5 parcelas (cenário comum)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="calc-hint" style="margin-top:10px">*Regra educativa típica para 1º pedido. Número de parcelas também depende se é 1º, 2º ou 3º+ requerimento — a tabela oficial prevalece.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Aviso</h3>
+        <p style="margin:0;color:var(--muted);font-size:14px">Estimativas educativas. O valor e o direito oficiais vêm do gov.br / SINE / Carteira de Trabalho Digital. Esta página não envia dados e não garante benefício. Piso e teto 2026 são informativos — confirme na fonte oficial.</p>
+      </div>
+    </section>
+
+    <section class="block offer" id="kit">
+      <div class="offer-card">
+        <p class="offer-tag">Kit completo</p>
+        <h2>PDF + esta calculadora</h2>
+        <p class="offer-desc">Guia com matriz de elegibilidade, prazos, checklists, erros comuns e link permanente desta calculadora.</p>
+        <div class="price-row">
+          <span class="price">R$9,90</span>
+          <span class="price-note">PIX · PDF na hora</span>
+        </div>
+        <div class="offer-actions">
+          <!-- TODO: replace PLACEHOLDER with real Kiwify checkout slug when product is created -->
+          <a class="btn btn-primary btn-block" id="ctaCheckout" href="https://pay.kiwify.com.br/PLACEHOLDER">Comprar com PIX — R$9,90</a>
+          <a class="btn btn-wa btn-block" href="https://wa.me/555197742550?text=Oi%21%20Preciso%20de%20ajuda%20com%20o%20Kit%20Seguro-Desemprego" target="_blank" rel="noopener">Ajuda no WhatsApp</a>
+        </div>
+        <p class="fine"><a href="./" style="color:var(--cyan)">← Voltar à página do kit</a></p>
+      </div>
+    </section>
+  </main>
+
+    <section class="block help-wa">
+      <div class="card">
+        <p style="margin:0 0 12px;color:var(--muted);font-size:14px">Para ajuda ou dúvidas, nos chame no WhatsApp.</p>
+        <a class="btn btn-wa btn-block" href="https://wa.me/555197742550?text=Oi%21%20Preciso%20de%20ajuda%20com%20o%20Kit%20Seguro-Desemprego" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+      </div>
+    </section>
+
+  <footer class="foot">
+    <p>Kit Seguro-Desemprego · Calculadora informativa · Não substitui gov.br, SINE ou advogado</p>
+  </footer>
+
+  <script>
+    // TODO: replace PLACEHOLDER with real Kiwify checkout slug when product is created
+    const CHECKOUT_URL = "https://pay.kiwify.com.br/PLACEHOLDER";
+    document.getElementById("ctaCheckout").addEventListener("click", function (e) {
+      e.preventDefault();
+      if (!CHECKOUT_URL || CHECKOUT_URL.includes("PLACEHOLDER")) {
+        alert("Checkout em configuração. Atualize em instantes.");
+        return;
+      }
+      window.location.href = CHECKOUT_URL;
+    });
+
+    const money = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    function parseBR(v) {
+      if (v == null) return NaN;
+      let s = String(v).trim().replace(/\s/g, "");
+      if (!s) return NaN;
+      if (s.includes(",") && s.includes(".")) s = s.replace(/\./g, "").replace(",", ".");
+      else if (s.includes(",")) s = s.replace(",", ".");
+      const n = Number(s);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    // 2026 informative estimates — confirm on gov.br
+    const PISO = 1621.00;
+    const TETO = 2518.65;
+    // Educational brackets aligned to floor/ceiling (not a substitute for official table)
+    const FAIXA1 = PISO / 0.8; // ~2026.25 — below this, 80% of average (then clamp to piso)
+    const FAIXA2 = TETO;       // above: approach ceiling via 80%/50% style
+
+    function parcelaEstimada(media) {
+      let v;
+      if (media <= FAIXA1) {
+        v = media * 0.8;
+      } else if (media <= FAIXA2 * 1.15) {
+        // 80% até FAIXA1 + 50% do excedente (modelo clássico educativo)
+        v = FAIXA1 * 0.8 + (media - FAIXA1) * 0.5;
+      } else {
+        v = TETO;
+      }
+      if (v < PISO) v = PISO;
+      if (v > TETO) v = TETO;
+      return Math.round(v * 100) / 100;
+    }
+
+    function parcelasPorMeses(meses) {
+      if (!(meses >= 0)) return null;
+      if (meses < 6) return 0;
+      if (meses <= 11) return 3;
+      if (meses <= 23) return 4;
+      return 5;
+    }
+
+    const ELEGIVEL = { sjc: true, indireta: true, pedido: false, acordo: false, justa: false };
+    const TIPO_LABEL = {
+      sjc: "Demissão sem justa causa",
+      indireta: "Rescisão indireta",
+      pedido: "Pedido de demissão",
+      acordo: "Acordo (art. 484-A)",
+      justa: "Justa causa",
+    };
+
+    document.getElementById("calcBtn").addEventListener("click", () => {
+      const tipo = document.getElementById("tipoSaida").value;
+      const media = parseBR(document.getElementById("media").value);
+      const meses = Number(document.getElementById("meses").value);
+      const fixas = document.getElementById("parcelasFixas").value;
+      const box = document.getElementById("result");
+      const meta = document.getElementById("meta");
+      const eleg = document.getElementById("elegValor");
+
+      const okTipo = !!ELEGIVEL[tipo];
+      let nParc = fixas ? Number(fixas) : parcelasPorMeses(meses);
+      if (fixas === "" && !(meses >= 0)) nParc = null;
+
+      if (!okTipo) {
+        eleg.textContent = "Não elegível";
+        meta.innerHTML = [
+          "<li>Tipo: " + TIPO_LABEL[tipo] + "</li>",
+          "<li>Em regra, seguro-desemprego NÃO cabe em pedido, acordo 484-A ou justa causa.</li>",
+          "<li>Cenários típicos com direito: demissão sem justa causa e rescisão indireta.</li>",
+          "<li>Confirme sempre no gov.br / SINE / Carteira de Trabalho Digital.</li>",
+        ].join("");
+        box.hidden = false;
+        return;
+      }
+
+      if (!(media > 0)) {
+        eleg.textContent = "—";
+        meta.innerHTML = "<li>Informe uma média salarial válida.</li>";
+        box.hidden = false;
+        return;
+      }
+
+      if (nParc === null) {
+        eleg.textContent = "—";
+        meta.innerHTML = "<li>Informe os meses trabalhados ou escolha o nº de parcelas.</li>";
+        box.hidden = false;
+        return;
+      }
+
+      if (nParc === 0) {
+        eleg.textContent = "Verificar";
+        meta.innerHTML = [
+          "<li>Tipo: " + TIPO_LABEL[tipo] + " — cenário tipicamente elegível</li>",
+          "<li>Meses informados: " + meses + " — abaixo de 6 costuma não gerar parcelas no 1º pedido.</li>",
+          "<li>Confirme requisitos oficiais do seu requerimento (1º, 2º ou 3º+).</li>",
+        ].join("");
+        box.hidden = false;
+        return;
+      }
+
+      const parc = parcelaEstimada(media);
+      const total = parc * nParc;
+      eleg.textContent = "Elegível (estimado)";
+      meta.innerHTML = [
+        "<li>Tipo: " + TIPO_LABEL[tipo] + "</li>",
+        "<li>Média usada: " + money(media) + "</li>",
+        "<li>Parcela estimada: " + money(parc) + " (piso ~" + money(PISO) + " · teto ~" + money(TETO) + ")</li>",
+        "<li>Nº de parcelas: " + nParc + (fixas ? " (escolhido)" : " (pelos meses)") + "</li>",
+        "<li>Total estimado: " + money(total) + "</li>",
+        "<li>Prazo típico de pedido: do 7º ao 120º dia após a demissão.</li>",
+        "<li>Confirme valor e direito no gov.br — esta é só uma estimativa educativa.</li>",
+      ].join("");
+      box.hidden = false;
+    });
+  </script>
+
+  <a class="wa-fab" href="https://wa.me/555197742550?text=Oi%21%20Preciso%20de%20ajuda%20com%20o%20Kit%20Seguro-Desemprego" target="_blank" rel="noopener" aria-label="Ajuda no WhatsApp" title="WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.52 3.48A11.86 11.86 0 0 0 12.04 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.15 1.6 5.96L0 24l6.3-1.65a11.9 11.9 0 0 0 5.74 1.46h.01c6.54 0 11.88-5.34 11.88-11.9 0-3.18-1.24-6.16-3.41-8.43zM12.05 21.15h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.64-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.98c0 5.45-4.44 9.88-9.88 9.88zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.04-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35z"/></svg>
+  </a>
+
+</body>
+</html>
