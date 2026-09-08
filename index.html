@@ -30,15 +30,13 @@
       <p class="eyebrow">Guia digital · PDF na hora</p>
       <h1>Seguro-desemprego sem enrolação: <span>prazo, parcelas e checklist</span></h1>
       <p class="lead">Quem tem direito, quando pedir (7º ao 120º dia), quantas parcelas e o valor estimado — em linguagem simples, com checklist do pedido.</p>
-      <!-- Video: omit until apresentacao-kit-seguro-desemprego.mp4 exists
       <div class="hero-video">
         <video controls autoplay muted playsinline loop preload="auto" title="Apresentação do Kit Seguro-Desemprego">
-          <source src="apresentacao-kit-seguro-desemprego.mp4" type="video/mp4" />
+          <source src="apresentacao-kit-seguro.mp4" type="video/mp4" />
           Seu navegador não reproduz vídeo HTML5.
         </video>
         <p class="video-caption">Veja o que vem no PDF (cerca de 40 segundos)</p>
       </div>
-      -->
       <div class="hero-actions">
         <a class="btn btn-primary" id="ctaHero" href="#kit">Quero o kit — R$9,90</a>
         <a class="btn btn-wa" href="https://wa.me/555197742550?text=Oi%21%20Preciso%20de%20ajuda%20com%20o%20Kit%20Seguro-Desemprego" target="_blank" rel="noopener">WhatsApp</a>
@@ -177,6 +175,17 @@
         goCheckout();
       }
     });
+  </script>
+
+
+  <script>
+    (function () {
+      var v = document.querySelector(".hero-video video");
+      if (!v) return;
+      v.muted = true;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    })();
   </script>
 
   <div id="socialToast" class="social-toast" aria-live="polite" style="display:none">
