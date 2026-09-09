@@ -9,8 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260908seguro" />
+  <link rel="stylesheet" href="styles.css?v=20260909gerarpdf" />
   <link rel="icon" href="logo.png" type="image/png" />
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="glow" aria-hidden="true"></div>
@@ -79,6 +80,7 @@
         <div class="result" id="result" hidden>
           <div class="result-main"><span id="elegLabel">Elegibilidade</span><strong id="elegValor">—</strong></div>
           <ul class="result-meta" id="meta"></ul>
+          <button type="button" class="btn btn-primary btn-block" id="seguroPdfBtn" style="margin-top:12px" hidden>Gerar PDF desta estimativa</button>
         </div>
 
         <details class="calc-table">
@@ -196,6 +198,51 @@
       justa: "Justa causa",
     };
 
+
+    let lastSeguro = null;
+    function gerarPdfSeguro(data){
+      if(!window.jspdf || !window.jspdf.jsPDF){
+        alert("Biblioteca de PDF ainda carregando. Tente de novo.");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit:"mm", format:"a4" });
+      const W=doc.internal.pageSize.getWidth(), M=14;
+      let y=16;
+      const ink=[22,26,36], muted=[88,96,110], accent=[210,100,20], soft=[230,234,240], darkBg=[7,11,20];
+      function ensure(h){ if(y+h>285){ doc.addPage(); y=16; } }
+      function section(t){ ensure(10); doc.setFillColor(...soft); doc.roundedRect(M,y-4,W-M*2,8,1.5,1.5,"F"); doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...accent); doc.text(t,M+2,y+1.5); y+=8; }
+      function row(l,v){ ensure(6); doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(...muted); doc.text(String(l),M+1,y); doc.setTextColor(...ink); doc.setFont("helvetica","bold"); doc.text(String(v),W-M-1,y,{align:"right"}); y+=5.4; }
+      function para(t){ ensure(8); doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...muted); const lines=doc.splitTextToSize(t,W-M*2-2); doc.text(lines,M+1,y); y+=lines.length*3.8+2; }
+
+      doc.setFillColor(...darkBg); doc.rect(0,0,W,26,"F");
+      doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(13);
+      doc.text("Kit Seguro-Desemprego — estimativa personalizada", M, 11);
+      doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(170,182,198);
+      doc.text("Gerado em "+new Date().toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"})+"  ·  mesmos números da calculadora", M, 18);
+      y=34;
+
+      section("Dados informados");
+      data.inputs.forEach(function(p){ row(p[0], p[1]); });
+      y+=2;
+      section("Resultado");
+      data.results.forEach(function(p){ row(p[0], p[1]); });
+      if(data.meta && data.meta.length){
+        y+=2; section("Detalhes");
+        data.meta.forEach(function(line){
+          ensure(6);
+          doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...ink);
+          const lines=doc.splitTextToSize("• "+line, W-M*2-2);
+          doc.text(lines, M+1, y); y+=lines.length*4+1;
+        });
+      }
+      y+=2; section("Aviso");
+      para("Estimativa educativa. O valor e o direito oficiais vêm do gov.br / SINE / Carteira de Trabalho Digital. Esta página não envia dados e não garante benefício. Piso e teto informativos — confirme na fonte oficial.");
+      doc.setFontSize(7); doc.setTextColor(...muted);
+      doc.text("Kit Seguro-Desemprego · mkrecisao.github.io/kit-seguro-desemprego · PDF no seu aparelho", M, 290);
+      doc.save("kit-seguro-desemprego-estimativa.pdf");
+    }
+
     document.getElementById("calcBtn").addEventListener("click", () => {
       const tipo = document.getElementById("tipoSaida").value;
       const media = parseBR(document.getElementById("media").value);
@@ -211,13 +258,20 @@
 
       if (!okTipo) {
         eleg.textContent = "Não elegível";
-        meta.innerHTML = [
-          "<li>Tipo: " + TIPO_LABEL[tipo] + "</li>",
-          "<li>Em regra, seguro-desemprego NÃO cabe em pedido, acordo 484-A ou justa causa.</li>",
-          "<li>Cenários típicos com direito: demissão sem justa causa e rescisão indireta.</li>",
-          "<li>Confirme sempre no gov.br / SINE / Carteira de Trabalho Digital.</li>",
-        ].join("");
+        const lines = [
+          "Tipo: " + TIPO_LABEL[tipo],
+          "Em regra, seguro-desemprego NÃO cabe em pedido, acordo 484-A ou justa causa.",
+          "Cenários típicos com direito: demissão sem justa causa e rescisão indireta.",
+          "Confirme sempre no gov.br / SINE / Carteira de Trabalho Digital.",
+        ];
+        meta.innerHTML = lines.map(function(l){return "<li>"+l+"</li>";}).join("");
         box.hidden = false;
+        lastSeguro = {
+          inputs: [["Tipo de saída", TIPO_LABEL[tipo]], ["Média salarial", media>0?money(media):"—"], ["Meses / parcelas", fixas? (fixas+" (escolhido)") : (Number.isFinite(meses)? String(meses): "—")]],
+          results: [["Elegibilidade", "Não elegível"]],
+          meta: lines
+        };
+        document.getElementById("seguroPdfBtn").hidden = false;
         return;
       }
 
@@ -225,6 +279,8 @@
         eleg.textContent = "—";
         meta.innerHTML = "<li>Informe uma média salarial válida.</li>";
         box.hidden = false;
+        lastSeguro = null;
+        document.getElementById("seguroPdfBtn").hidden = true;
         return;
       }
 
@@ -232,33 +288,63 @@
         eleg.textContent = "—";
         meta.innerHTML = "<li>Informe os meses trabalhados ou escolha o nº de parcelas.</li>";
         box.hidden = false;
+        lastSeguro = null;
+        document.getElementById("seguroPdfBtn").hidden = true;
         return;
       }
 
       if (nParc === 0) {
         eleg.textContent = "Verificar";
-        meta.innerHTML = [
-          "<li>Tipo: " + TIPO_LABEL[tipo] + " — cenário tipicamente elegível</li>",
-          "<li>Meses informados: " + meses + " — abaixo de 6 costuma não gerar parcelas no 1º pedido.</li>",
-          "<li>Confirme requisitos oficiais do seu requerimento (1º, 2º ou 3º+).</li>",
-        ].join("");
+        const lines = [
+          "Tipo: " + TIPO_LABEL[tipo] + " — cenário tipicamente elegível",
+          "Meses informados: " + meses + " — abaixo de 6 costuma não gerar parcelas no 1º pedido.",
+          "Confirme requisitos oficiais do seu requerimento (1º, 2º ou 3º+).",
+        ];
+        meta.innerHTML = lines.map(function(l){return "<li>"+l+"</li>";}).join("");
         box.hidden = false;
+        lastSeguro = {
+          inputs: [["Tipo de saída", TIPO_LABEL[tipo]], ["Média salarial", money(media)], ["Meses trabalhados", String(meses)]],
+          results: [["Elegibilidade", "Verificar"], ["Parcelas", "0 (estimado)"]],
+          meta: lines
+        };
+        document.getElementById("seguroPdfBtn").hidden = false;
         return;
       }
 
       const parc = parcelaEstimada(media);
       const total = parc * nParc;
       eleg.textContent = "Elegível (estimado)";
-      meta.innerHTML = [
-        "<li>Tipo: " + TIPO_LABEL[tipo] + "</li>",
-        "<li>Média usada: " + money(media) + "</li>",
-        "<li>Parcela estimada: " + money(parc) + " (piso ~" + money(PISO) + " · teto ~" + money(TETO) + ")</li>",
-        "<li>Nº de parcelas: " + nParc + (fixas ? " (escolhido)" : " (pelos meses)") + "</li>",
-        "<li>Total estimado: " + money(total) + "</li>",
-        "<li>Prazo típico de pedido: do 7º ao 120º dia após a demissão.</li>",
-        "<li>Confirme valor e direito no gov.br — esta é só uma estimativa educativa.</li>",
-      ].join("");
+      const lines = [
+        "Tipo: " + TIPO_LABEL[tipo],
+        "Média usada: " + money(media),
+        "Parcela estimada: " + money(parc) + " (piso ~" + money(PISO) + " · teto ~" + money(TETO) + ")",
+        "Nº de parcelas: " + nParc + (fixas ? " (escolhido)" : " (pelos meses)"),
+        "Total estimado: " + money(total),
+        "Prazo típico de pedido: do 7º ao 120º dia após a demissão.",
+        "Confirme valor e direito no gov.br — esta é só uma estimativa educativa.",
+      ];
+      meta.innerHTML = lines.map(function(l){return "<li>"+l+"</li>";}).join("");
       box.hidden = false;
+      lastSeguro = {
+        inputs: [
+          ["Tipo de saída", TIPO_LABEL[tipo]],
+          ["Média salarial (últimos 3)", money(media)],
+          ["Meses / parcelas", fixas ? (nParc + " (escolhido)") : (meses + " meses → " + nParc + " parcelas")]
+        ],
+        results: [
+          ["Elegibilidade", "Elegível (estimado)"],
+          ["Parcela estimada", money(parc)],
+          ["Nº de parcelas", String(nParc)],
+          ["Total estimado", money(total)]
+        ],
+        meta: lines
+      };
+      document.getElementById("seguroPdfBtn").hidden = false;
+    });
+
+    document.getElementById("seguroPdfBtn").addEventListener("click", function(){
+      if(!lastSeguro) return;
+      gerarPdfSeguro(lastSeguro);
     });
   </script>
 
